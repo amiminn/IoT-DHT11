@@ -11,7 +11,7 @@
 const char* ssid = "wifiku";
 const char* password = "12121212";
 
-#define DHTPIN D7     // Digital pin connected to the DHT sensor
+#define DHTPIN D1     // Digital pin connected to the DHT sensor
 
 // Uncomment the type of sensor in use:
 #define DHTTYPE    DHT11     // DHT 11
@@ -38,36 +38,104 @@ const char index_html[] PROGMEM = R"rawliteral(
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DHT11</title>
+    <title>Fetch api</title>
+    <style>
+      body {
+        text-align: center;
+      }
+    </style>
   </head>
   <body>
-    <h1>
-      temperature:
-      <p id="temp"></p>
-    </h1>
-    <h1>
-      humidity :
-      <p id="humd"></p>
-    </h1>
+    <h2>Temperatur</h2>
+    <h1 id="temp"></h1>
 
+    <br />
+
+    <h2>Kelembapan</h2>
+    <h1 id="humd"></h1>
+
+    <br />
+
+    <button>kirim</button>
+
+    <br />
+
+    <a id="db"></a>
+    <p id="timer"></p>
     <script
       src="https://code.jquery.com/jquery-3.6.0.min.js"
       integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
       crossorigin="anonymous"
     ></script>
     <script>
-        setInterval(function () {
-        $.get("/temperature", (response, status) => {
-          $("#temp").html(response);
-        });
+      $(document).ready(() => {
+        async function send() {
+          const url = "https://db-nuklir.herokuapp.com/db-time";
+          const database = "https://db-nuklir.herokuapp.com/database";
 
-        $.get("/humidity", (response, status) => {
-          $("#humd").html(response);
+          const get = await $.get(url, (res) => {
+            return res;
+          });
+
+          const temp = await $.get("/temperature", (res) => {
+            return res;
+          });
+
+          const humd = await $.get("/humidity", (res) => {
+            return res;
+          });
+
+          const humdnya = humd.value;
+          const tempnya = temp.value;
+
+          function dataPost(datenya) {
+            $.post(
+              database,
+              {
+                temp: tempnya,
+                humd: humdnya,
+                date: datenya,
+              },
+              (res) => {
+                return res;
+              }
+            );
+          }
+
+          i = 1;
+          setInterval(() => {
+            dataPost(Date.now());
+            $("button").html(`running ... (${i})`);
+            i++;
+          }, get.time);
+        }
+
+        function fromNodeMcu() {
+          $.get("/temperature", (res) => {
+            $("#temp").html(res);
+          });
+          $.get("/humidity", (res) => {
+            $("#humd").html(res);
+          });
+        }
+
+        setInterval(() => {
+          $("#timer").html(new Date());
+          fromNodeMcu();
+        }, 1000);
+
+        $("button").click(() => {
+          $("button").html(`running ... (0)`);
+          $("#db")
+            .html("https://db-nuklir.herokuapp.com/database")
+            .attr("href", "https://db-nuklir.herokuapp.com/database");
+          send();
         });
-      }, 1000);
+      });
     </script>
   </body>
 </html>
+
 
 )rawliteral";
 
