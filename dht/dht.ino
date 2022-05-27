@@ -77,18 +77,7 @@ const char index_html[] PROGMEM = R"rawliteral(
             return res;
           });
 
-          const temp = await $.get("/temperature", (res) => {
-            return res;
-          });
-
-          const humd = await $.get("/humidity", (res) => {
-            return res;
-          });
-
-          const humdnya = humd.value;
-          const tempnya = temp.value;
-
-          function dataPost(datenya) {
+          function dataPost(datenya, tempnya, humdnya) {
             $.post(
               database,
               {
@@ -104,17 +93,17 @@ const char index_html[] PROGMEM = R"rawliteral(
 
           i = 1;
           setInterval(() => {
-            dataPost(Date.now());
+            dataPost(Date.now(), $("#temp").html(), $("#humd").html());
             $("button").html(`running ... (${i})`);
             i++;
           }, get.time);
         }
 
         function fromNodeMcu() {
-          $.get("/temperature", (res) => {
+          $.get("http://192.168.43.177/temperature", (res) => {
             $("#temp").html(res);
           });
-          $.get("/humidity", (res) => {
+          $.get("http://192.168.43.177/humidity", (res) => {
             $("#humd").html(res);
           });
         }
@@ -127,8 +116,9 @@ const char index_html[] PROGMEM = R"rawliteral(
         $("button").click(() => {
           $("button").html(`running ... (0)`);
           $("#db")
-            .html("https://db-nuklir.herokuapp.com/database")
-            .attr("href", "https://db-nuklir.herokuapp.com/database");
+            .html("view Database")
+            .attr("href", "https://db-nuklir.herokuapp.com/database")
+            .attr("target", "blank");
           send();
         });
       });
