@@ -1,1 +1,4 @@
 https://kelasrobot.com/apa-itu-nodemcu-esp8266-bagaimana-cara-pakenya/
+
+https://www.nyebarilmu.com/cara-mengakses-relay-menggunakan-arduino-uno/
+https://www.kodingindonesia.com/belajar-iot-kendali-led-dengan-web-server/

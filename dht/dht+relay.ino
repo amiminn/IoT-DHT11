@@ -12,6 +12,7 @@ const char* ssid = "wifiku";
 const char* password = "12121212";
 
 #define DHTPIN D1     // Digital pin connected to the DHT sensor
+int RELAY = D2;
 
 // Uncomment the type of sensor in use:
 #define DHTTYPE    DHT11     // DHT 11
@@ -56,21 +57,12 @@ const char index_html[] PROGMEM = R"rawliteral(
 
     <br />
 
-    <button>kirim</button>
+    <button id="btnKirim">kirim</button>
 
     <br />
 
     <a id="db"></a>
     <p id="timer"></p>
-
-
-    <br />
-    <br />
-
-    <p id="relay"></p>
-    <button id="btnRelayOn">ON</button>
-    <button id="btnRelayOff">OFF</button>
-    
     <script
       src="https://code.jquery.com/jquery-3.6.0.min.js"
       integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
@@ -103,7 +95,7 @@ const char index_html[] PROGMEM = R"rawliteral(
           i = 1;
           setInterval(() => {
             dataPost(Date.now(), $("#temp").html(), $("#humd").html());
-            $("button").html(`running ... (${i})`);
+            $("#btnKirim").html(`running ... (${i})`);
             i++;
           }, get.time);
         }
@@ -122,14 +114,27 @@ const char index_html[] PROGMEM = R"rawliteral(
           fromNodeMcu();
         }, 1000);
 
-        $("button").click(() => {
-          $("button").html(`running ... (0)`);
+        $("#btnKirim").click(() => {
+          $("#btnKirim").html(`running ... (0)`);
           $("#db")
             .html("view Database")
             .attr("href", "https://db-nuklir.herokuapp.com/database")
             .attr("target", "blank");
           send();
         });
+
+        $("#btnRelayOn").click(() => {
+          $.get("/onrelay", () => {
+            $("#relay").html("RELAY STATUS: ON");
+          });
+        });
+
+        $("#btnRelayOff").click(() => {
+          $.get("/offrelay", () => {
+            $("#relay").html("RELAY STATUS: OFF");
+          });
+        });
+
       });
     </script>
   </body>
@@ -177,6 +182,19 @@ void setup(){
     request->send_P(200, "text/plain", String(h).c_str());
   });
 
+pinMode(RELAY, OUTPUT);
+
+ server.on("/onrelay", [](){
+    server.send(200, "text/html", page);
+    digitalWrite(RELAY, HIGH);
+    delay(1000);
+  });
+  server.on("/offrelay", [](){
+    server.send(200, "text/html", page);
+    digitalWrite(RELAY, LOW);
+    delay(1000); 
+  });
+
   // Start server
   server.begin();
 }
@@ -207,5 +225,5 @@ void loop(){
     }
   }
 
-  
+  server.handleClient();
 }

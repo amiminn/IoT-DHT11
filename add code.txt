@@ -1,0 +1,19 @@
+// define
+int RELAY = D2;
+
+//setup
+pinMode(RELAY, OUTPUT);
+
+ server.on("/onrelay", [](){
+    server.send(200, "text/html", page);
+    digitalWrite(RELAY, HIGH);
+    delay(1000);
+  });
+  server.on("/offLEDOff", [](){
+    server.send(200, "text/html", page);
+    digitalWrite(RELAY, LOW);
+    delay(1000); 
+  });
+
+//loop
+
